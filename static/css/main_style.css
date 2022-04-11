@@ -1,0 +1,53 @@
+@font-face {
+	font-family: 'CustomFont';
+	src: url(../fonts/pixel.ttf);
+}
+
+
+body {
+    background-color: #232624;
+    font-family: 'CustomFont';
+    color: #eeeeee;
+}
+
+
+hr {
+    border: none;
+    color: #99b7a0;
+    background-color: #99b7a0;
+    height: 1px;
+}
+
+
+h1 {
+    font-size: 40px;
+}
+
+
+form {
+    width: 450px;
+}
+
+
+.heading_text {
+    color: #519e7f;
+}
+
+
+.header_div {
+    width: 610px;
+    height: 120px;
+    background-color: #1b1d1b;
+    padding: 15px;
+    float: left;
+}
+
+
+.user_div {
+    display: block;
+    margin-left: auto;
+    width: 500px;
+    height: 120px;
+    background-color: #1b1d1b;
+    padding: 15px;
+}

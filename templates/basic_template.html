@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ heading }}</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/main_style.css" />
+</head>
+<body>
+    <header>
+        <div class="header_div">
+            <h1 class="heading_text">Название нашей игры</h1>
+            <h5>Слоган нашей игры</h5>
+        </div>
+        <div class="user_div" align="center">
+            Здесь будет информация о пользователе
+        </div>
+    </header>
+    <main role="main" class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
