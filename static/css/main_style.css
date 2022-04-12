@@ -5,9 +5,17 @@
 
 
 body {
-    background-color: #232624;
+    background-image: url(../img/background.jpg);
     font-family: 'CustomFont';
     color: #eeeeee;
+}
+
+
+div {
+    background-color: #111110;
+    width: 60%;
+    border-radius: 7px;
+    border: 1px solid #ffffff;
 }
 
 
@@ -29,15 +37,19 @@ form {
 }
 
 
+.centred_div {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .heading_text {
     color: #519e7f;
 }
 
 
 .header_div {
-    width: 610px;
-    height: 120px;
-    background-color: #1b1d1b;
+    width: 33%;
+    min-height: 120px;
     padding: 15px;
     float: left;
 }
@@ -46,8 +58,7 @@ form {
 .user_div {
     display: block;
     margin-left: auto;
-    width: 500px;
-    height: 120px;
-    background-color: #1b1d1b;
+    width: 25%;
+    min-height: 120px;
     padding: 15px;
 }
