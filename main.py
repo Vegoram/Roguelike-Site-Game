@@ -2,6 +2,9 @@ from flask import Flask, render_template
 from data import db_session
 from werkzeug.utils import redirect
 from data.models.player import Player
+from data.models.location import Location
+from data.models.enemy import Enemy
+from data.models.items import Items
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user
 
@@ -21,7 +24,7 @@ def load_user(player_id):
 
 @app.route('/')
 def main_page():
-    return render_template('basic_template.html')
+    return render_template('basic_template.html', heading='Тени Аркполиса')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -49,15 +52,66 @@ def register():
             inventory=None,
             equipped=None,
             money=0,
-            location='square/0/free',
+            location='1/free',
             player_class=form.player_class.data,
             hp=health,
-            level=1)
+            level='0/100-1')
         player.set_password(form.password.data)
         db_sess.add(player)
         db_sess.commit()
         return redirect('/')
     return render_template('registration_page.html', heading='Регистрация', form=form)
+
+
+@app.route('/new_enemy', methods=['GET', 'POST'])
+def new_enemy():
+    form = NewEnemyForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        if db_sess.query(Location).filter(Location.id == form.location.data).first().level > int(form.min_level.data):
+            return render_template('new_enemy_page.html', heading='Новый враг',
+                                   form=form,
+                                   message='Уровень монстра слишком мал для этой локации')
+        if db_sess.query(Enemy).filter(Enemy.name == form.name.data).first():
+            return render_template('new_enemy_page.html', heading='Новый враг',
+                                   form=form,
+                                   message='Монстр с таким именем уже существует')
+        monster = Enemy(name=form.name.data,
+                        location=form.location.data,
+                        min_level=form.min_level.data)
+        db_sess.add(monster)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('new_enemy_page.html', heading='Новый враг', form=form)
+
+
+@app.route('/new_item', methods=['GET', 'POST'])
+def new_item():
+    form = NewItemForm()
+    if form.validate_on_submit():
+        if form.item_type in range(1, 5) and not form.protection.data:
+            return render_template('new_item_page.html', heading='Новый предмет',
+                                   form=form,
+                                   message='Предмет с типом "Доспех" должен иметь показатель защиты')
+        if form.item_type in range(5, 12) and not form.attack.data:
+            return render_template('new_item_page.html', heading='Новый предмет',
+                                   form=form,
+                                   message='Предмет с типом "Оружие" должен иметь показатель атаки')
+        db_sess = db_session.create_session()
+        if db_sess.query(Items).filter(Items.name == form.name.data).first():
+            return render_template('new_item_page.html', heading='Новый предмет',
+                                   form=form,
+                                   message='Предмет с таким названием уже существует')
+        item = Items(name=form.name.data,
+                     item_type=form.item_type.data,
+                     protection=form.protection.data,
+                     attack=form.attack.data,
+                     class_required=form.class_required.data,
+                     cost=form.cost.data)
+        db_sess.add(item)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('new_item_page.html', heading='Новый предмет', form=form)
 
 
 if __name__ == '__main__':

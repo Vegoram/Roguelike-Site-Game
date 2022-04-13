@@ -6,21 +6,12 @@
     <br>
     <a class="btn btn-secondary" href="/" role="button">На главную</a>
     <br><hr><br>
-    <h1 align="center">Создание предмета</h1>
+    <h1 align="center">Добавление предмета</h1>
     {% if message %}
         <div class='alert alert-danger' role="alert">{{ message }}!</div>
     {% endif %}
     <form action="" method="post">
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.classs.label }}<br>
-            {{ form.classs(class="form-control", type="email") }}<br>
-            {% for error in form.classs.errors %}
-                <p class="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
-        </p>
         <p>
             {{ form.name.label }}<br>
             {{ form.name(class="form-control") }}<br>
@@ -31,36 +22,53 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.surname.label }}<br>
-            {{ form.surname(class="form-control") }}<br>
-            {% for error in form.surname.errors %}
+            {{ form.item_type.label }}<br>
+            {% for radio_button in form.item_type %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.item_type.errors %}
                 <p class="alert alert-danger" role="alert">
                     {{ error }}
                 </p>
             {% endfor %}
         </p>
         <p>
-            {{ form.difens.label }}<br>
-            {{ form.difens(class="form-control", type="password") }}<br>
-            {% for error in form.difens.errors %}
+            {{ form.protection.label }}<br>
+            {{ form.protection(class="form-control") }}<br>
+            {% for error in form.protection.errors %}
                 <p class="alert alert-danger" role="alert">
                     {{ error }}
                 </p>
             {% endfor %}
         </p>
         <p>
-            {{ form.attac.label }}<br>
-            {{ form.attac(class="form-control", type="password") }}<br>
-            {% for error in form.attac.errors %}
+            {{ form.attack.label }}<br>
+            {{ form.attack(class="form-control") }}<br>
+            {% for error in form.attack.errors %}
                 <p class="alert alert-danger" role="alert">
                     {{ error }}
                 </p>
             {% endfor %}
         </p>
         <p>
-            {{ form.costs.label }}<br>
-            {{ form.costs(class="form-control") }}<br>
-            {% for error in form.costs.errors %}
+            {{ form.class_required.label }}<br>
+            {% for radio_button in form.class_required %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.class_required.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.cost.label }}<br>
+            {{ form.cost(class="form-control") }}<br>
+            {% for error in form.cost.errors %}
                 <p class="alert alert-danger" role="alert">
                     {{ error }}
                 </p>

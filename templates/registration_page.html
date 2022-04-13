@@ -69,11 +69,11 @@
         <p>
             {{ form.player_class.label }}<br>
             {% for radio_button in form.player_class %}
-                <p>
+                <p align="left">
                     {{ radio_button }} {{ radio_button.label }}
                 </p>
             {% endfor %}
-            {% for error in form.nickname.errors %}
+            {% for error in form.player_class.errors %}
                 <p class="alert alert-danger" role="alert">
                     {{ error }}
                 </p>
