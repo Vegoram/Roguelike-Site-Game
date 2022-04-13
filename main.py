@@ -7,7 +7,7 @@ from data.models.enemy import Enemy
 from data.models.items import Items
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user
-
+from loginform import LoginForm
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
@@ -25,6 +25,20 @@ def load_user(player_id):
 @app.route('/')
 def main_page():
     return render_template('basic_template.html', heading='Тени Аркполиса')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(Player).filter(Player.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect("/")
+        return render_template('login.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -61,6 +75,12 @@ def register():
         db_sess.commit()
         return redirect('/')
     return render_template('registration_page.html', heading='Регистрация', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 
 @app.route('/new_enemy', methods=['GET', 'POST'])
