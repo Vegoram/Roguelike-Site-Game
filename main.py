@@ -132,13 +132,26 @@ def new_enemy():
     return render_template('new_enemy_page.html', heading='Новый враг', form=form)
 
 
-@app.route('/new_item', methods=['GET', 'POST'])
+@app.route('/new_item/<int:id>', methods=['GET', 'POST'])
 @login_required
-def new_item():
+def new_item(id):
     db_sess = db_session.create_session()
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])).fetchall():
         return redirect('/message/low_access')
     form = NewItemForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        items = db_sess.query(Items).filter(Items.id == id).first()
+        if items:
+            form.name.data = items.name
+            form.rarity.data = items.rarity
+            form.item_type.data = items.item_type
+            form.protection.data = int(items.protection)
+            form.attack.data = int(items.attack)
+            form.class_required.data = items.class_required
+            form.cost.data = int(items.cost)
+        else:
+            abort(404)
     if form.validate_on_submit():
         if form.item_type in range(1, 5) and not form.protection.data:
             return render_template('new_item_page.html', heading='Новый предмет',
@@ -161,7 +174,7 @@ def new_item():
                      cost=int(form.cost.data))
         db_sess.add(item)
         db_sess.commit()
-        return redirect('/new_item')
+        return redirect('/items_table'')
     return render_template('new_item_page.html', heading='Новый предмет', form=form)
 
 
@@ -169,12 +182,12 @@ def new_item():
 def items_table():
     db_sess = db_session.create_session()
     flag = current_user in db_sess.query(Player).filter(Player.id.in_([1, 2, 3]))
-    i = db_sess.query(Items).filter(Items.id > 0)
+    i = db_sess.query(Items)
     items = []
     for thing in i:
         req_class = db_sess.query(PlayerClass).filter(PlayerClass.id == thing.class_required).first().name
         item_type = db_sess.query(ItemType).filter(ItemType.id == thing.item_type).first().name
-        mini = [thing.name, thing.rarity, item_type, thing.protection, thing.attack, req_class, thing.cost]
+        mini = [thing.id, thing.name, thing.rarity, item_type, thing.protection, thing.attack, req_class, thing.cost]
         items.append(mini)
     return render_template('items_page.html', heading='Просмотр вещей', items=items, access=flag)
 
