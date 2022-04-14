@@ -169,5 +169,18 @@ def items_table():
     return render_template('items_page.html', heading='Просмотр вещей', items=items, access=flag)
 
 
+@app.route('/enemy_table', methods=['GET', 'POST'])
+def enemy_table():
+    db_sess = db_session.create_session()
+    flag = current_user in db_sess.query(Player).filter(Player.id.in_([1, 2, 3]))
+    i = db_sess.query(Enemy).filter(Enemy.id > 0)
+    enemies = []
+    for antagonist in i:
+        location = db_sess.query(Location).filter(Location.id == antagonist.location).first().name
+        mini = [antagonist.name, location, antagonist.min_level]
+        enemies.append(mini)
+    return render_template('enemy_page.html', heading='Просмотр врагов', enemies=enemies, access=flag)
+
+
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
