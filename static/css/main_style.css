@@ -41,6 +41,10 @@ form {
     width: 450px;
 }
 
+.table_div {
+    width: 95%;
+}
+
 
 .centred_div {
     margin-left: auto;

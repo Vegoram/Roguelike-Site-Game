@@ -2,11 +2,13 @@ from flask import Flask, render_template
 from data import db_session
 from werkzeug.utils import redirect
 from data.models.player import Player
+from data.models.player_class import PlayerClass
 from data.models.location import Location
 from data.models.enemy import Enemy
 from data.models.items import Items
+from data.models.item_type import ItemType
 from data.forms import *
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 
 db_session.global_init('db/game_database.db')
@@ -85,11 +87,24 @@ def logout():
     return redirect('/')
 
 
+@app.route('/message/<text>')
+def message(text):
+    if text == 'low_access':
+        t = 'У вас недостаточно прав для выполнения данного действия!'
+        return render_template('message_page.html', title='Внимание!', message=t)
+    else:
+        t = 'Произошла ошибка!'
+        return render_template('message_page.html', title='Внимание!', message=t)
+
+
 @app.route('/new_enemy', methods=['GET', 'POST'])
+@login_required
 def new_enemy():
+    db_sess = db_session.create_session()
+    if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])).fetchall():
+        return redirect('/message/low_access')
     form = NewEnemyForm()
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
         if db_sess.query(Location).filter(Location.id == form.location.data).first().level > int(form.min_level.data):
             return render_template('new_enemy_page.html', heading='Новый враг',
                                    form=form,
@@ -108,7 +123,11 @@ def new_enemy():
 
 
 @app.route('/new_item', methods=['GET', 'POST'])
+@login_required
 def new_item():
+    db_sess = db_session.create_session()
+    if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])).fetchall():
+        return redirect('/message/low_access')
     form = NewItemForm()
     if form.validate_on_submit():
         if form.item_type in range(1, 5) and not form.protection.data:
@@ -119,7 +138,6 @@ def new_item():
             return render_template('new_item_page.html', heading='Новый предмет',
                                    form=form,
                                    message='Предмет с типом "Оружие" должен иметь показатель атаки')
-        db_sess = db_session.create_session()
         if db_sess.query(Items).filter(Items.name == form.name.data).first():
             return render_template('new_item_page.html', heading='Новый предмет',
                                    form=form,
@@ -135,6 +153,20 @@ def new_item():
         db_sess.commit()
         return redirect('/new_item')
     return render_template('new_item_page.html', heading='Новый предмет', form=form)
+
+
+@app.route('/items_table', methods=['GET', 'POST'])
+def items_table():
+    db_sess = db_session.create_session()
+    flag = current_user in db_sess.query(Player).filter(Player.id.in_([1, 2, 3]))
+    i = db_sess.query(Items).filter(Items.id > 0)
+    items = []
+    for thing in i:
+        req_class = db_sess.query(PlayerClass).filter(PlayerClass.id == thing.class_required).first().name
+        item_type = db_sess.query(ItemType).filter(ItemType.id == thing.item_type).first().name
+        mini = [thing.name, thing.rarity, item_type, thing.protection, thing.attack, req_class, thing.cost]
+        items.append(mini)
+    return render_template('items_page.html', heading='Просмотр вещей', items=items, access=flag)
 
 
 if __name__ == '__main__':
