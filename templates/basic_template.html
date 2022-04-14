@@ -7,6 +7,10 @@
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
           crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../static/css/main_style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../static/img/ico/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/img/ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/img/ico/favicon-16x16.png">
+    <link rel="manifest" href="../static/img/ico/site.webmanifest">
 </head>
 <body>
     <header>
@@ -16,13 +20,14 @@
         </div>
         <div class="user_div" align="center">
             {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
-        {% else %}
-        <p>
-            <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
-            <a class="btn btn-success" href="/login">Войти</a>
-        </p>
-        {% endif %}
+                <p>{{ current_user.name }} {{ current_user.surname }}</p>
+                <a class="btn btn-secondary" href="/profile">Профиль</a>
+                <a class="btn btn-danger" href="/logout">Выйти</a>
+            {% else %}
+                <br>
+                <a class="btn btn-success" href="/register">Зарегистрироваться</a>
+                <a class="btn btn-primary" href="/login">Войти</a>
+            {% endif %}
         </div>
     </header>
     <main role="main" class="container">

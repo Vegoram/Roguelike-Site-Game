@@ -22,6 +22,19 @@
             {% endfor %}
         </p>
         <p>
+            {{ form.rarity.label }}<br>
+            {% for radio_button in form.rarity %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.rarity.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
             {{ form.item_type.label }}<br>
             {% for radio_button in form.item_type %}
                 <p align="left">

@@ -7,8 +7,9 @@ class Items(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    rarity = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     item_type = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('item_types.id'), nullable=False)
     protection = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     attack = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    class_required = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('classes.id'), nullable=False)
+    class_required = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('player_classes.id'), nullable=False)
     cost = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)

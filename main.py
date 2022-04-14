@@ -7,7 +7,7 @@ from data.models.enemy import Enemy
 from data.models.items import Items
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user
-from loginform import LoginForm
+
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
@@ -25,20 +25,6 @@ def load_user(player_id):
 @app.route('/')
 def main_page():
     return render_template('basic_template.html', heading='Тени Аркполиса')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        user = db_sess.query(Player).filter(Player.email == form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            return redirect("/")
-        return render_template('login.html',
-                               message="Неправильный логин или пароль",
-                               form=form)
-    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -76,11 +62,27 @@ def register():
         return redirect('/')
     return render_template('registration_page.html', heading='Регистрация', form=form)
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(Player).filter(Player.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            return redirect('/')
+        return render_template('autorisation_page.html',
+                               message='Неправильная почта или пароль',
+                               form=form)
+    return render_template('autorisation_page.html', title='Авторизация', form=form)
+
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return redirect("/")
+    return redirect('/')
 
 
 @app.route('/new_enemy', methods=['GET', 'POST'])
@@ -98,10 +100,10 @@ def new_enemy():
                                    message='Монстр с таким именем уже существует')
         monster = Enemy(name=form.name.data,
                         location=form.location.data,
-                        min_level=form.min_level.data)
+                        min_level=int(form.min_level.data))
         db_sess.add(monster)
         db_sess.commit()
-        return redirect('/')
+        return redirect('/new_enemy')
     return render_template('new_enemy_page.html', heading='Новый враг', form=form)
 
 
@@ -123,14 +125,15 @@ def new_item():
                                    form=form,
                                    message='Предмет с таким названием уже существует')
         item = Items(name=form.name.data,
+                     rarity=form.rarity.data,
                      item_type=form.item_type.data,
-                     protection=form.protection.data,
-                     attack=form.attack.data,
+                     protection=int(form.protection.data),
+                     attack=int(form.attack.data),
                      class_required=form.class_required.data,
-                     cost=form.cost.data)
+                     cost=int(form.cost.data))
         db_sess.add(item)
         db_sess.commit()
-        return redirect('/')
+        return redirect('/new_item')
     return render_template('new_item_page.html', heading='Новый предмет', form=form)
 
 

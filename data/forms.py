@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import EmailField, PasswordField, StringField, SubmitField, RadioField, DecimalField
+from wtforms import EmailField, PasswordField, StringField, SubmitField, RadioField, DecimalField, BooleanField
 from wtforms.validators import DataRequired
 
 
@@ -14,8 +14,19 @@ class NewPlayerForm(FlaskForm):
     submit = SubmitField('Создать игрока!')
 
 
+class LoginForm(FlaskForm):
+    email = EmailField('Почта', validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired()])
+    remember_me = BooleanField('Запомнить меня')
+    submit = SubmitField('Войти')
+
+
 class NewItemForm(FlaskForm):
     name = StringField('Название', validators=[DataRequired()])
+    rarity = RadioField('Качество', choices=[('Мусорное', 'Мусорное'), ('Обычное', 'Обычное'),
+                                             ('Качественное', 'Качественное'),
+                                             ('Высокотехнологичное', 'Высокотехнологичное'),
+                                             ('Шедевральное', 'Шедевральное'), ('Легендарное', 'Легендарное')])
     item_type = RadioField('Тип', choices=[(1, 'Доспех-Шлем'), (2, 'Доспех-Нагрудник'),
                                            (3, 'Доспех-Поножи'), (4, 'Доспех-Сапоги'),
                                            (5, 'Оружие-Колющее'), (6, 'Оружие-Режущее'),
@@ -24,8 +35,8 @@ class NewItemForm(FlaskForm):
                                            (11, 'Оружие-Уникальное'), (12, 'Другое-Предмет для события'),
                                            (13, 'Другое-На продажу')],
                            validators=[DataRequired()])
-    protection = DecimalField('Защита (оставьте пустым если нет)')
-    attack = DecimalField('Атака (оставьте пустым если нет)')
+    protection = DecimalField('Защита (поставьте 0 если нет)')
+    attack = DecimalField('Атака (поставьте 0 если нет)')
     class_required = RadioField('Необходимый класс', choices=[(1, 'Страж'), (2, 'Стрелок'), (3, 'Тень')])
     cost = DecimalField('Цена', validators=[DataRequired()])
     submit = SubmitField('Создать предмет!')
