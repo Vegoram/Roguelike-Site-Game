@@ -97,13 +97,22 @@ def message(text):
         return render_template('message_page.html', title='Внимание!', message=t)
 
 
-@app.route('/new_enemy', methods=['GET', 'POST'])
+@app.route('/new_enemy/<int:id>', methods=['GET', 'POST'])
 @login_required
 def new_enemy():
     db_sess = db_session.create_session()
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])).fetchall():
         return redirect('/message/low_access')
     form = NewEnemyForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        enemy = db_sess.query(Enemy).filter(Enemy.id == id).first()
+        if enemy:
+            form.name.data = enemy.name
+            form.location.data = enemy.location
+            form.min_level.data = int(enemy.min_level)
+        else:
+            abort(404)    
     if form.validate_on_submit():
         if db_sess.query(Location).filter(Location.id == form.location.data).first().level > int(form.min_level.data):
             return render_template('new_enemy_page.html', heading='Новый враг',
@@ -118,7 +127,7 @@ def new_enemy():
                         min_level=int(form.min_level.data))
         db_sess.add(monster)
         db_sess.commit()
-        return redirect('/new_enemy')
+        return redirect('/enemy_table')
     return render_template('new_enemy_page.html', heading='Новый враг', form=form)
 
 
@@ -173,11 +182,11 @@ def items_table():
 def enemy_table():
     db_sess = db_session.create_session()
     flag = current_user in db_sess.query(Player).filter(Player.id.in_([1, 2, 3]))
-    i = db_sess.query(Enemy).filter(Enemy.id > 0)
+    i = db_sess.query(Enemy)
     enemies = []
     for antagonist in i:
         location = db_sess.query(Location).filter(Location.id == antagonist.location).first().name
-        mini = [antagonist.name, location, antagonist.min_level]
+        mini = [antagonist.id, antagonist.name, location, antagonist.min_level]
         enemies.append(mini)
     return render_template('enemy_page.html', heading='Просмотр врагов', enemies=enemies, access=flag)
 
