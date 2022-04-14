@@ -5,25 +5,34 @@
 <div align="center" class="centred_div table_div">
     <br>
     <a class="btn btn-secondary" href="/" role="button">На главную</a>
-    <br><hr><br>
+    <br>
+    <hr>
+    <br>
     <h1 align="center">Список врагов:</h1><br>
     <table class="table table-dark" border="2">
         <thead>
-            <tr>
-                <th scope="col">Имя</th>
-                <th scope="col">Локация</th>
-                <th scope="col">Минимальный уровень</th>
-            </tr>
+        <tr>
+            <th scope="col">Имя</th>
+            <th scope="col">Локация</th>
+            <th scope="col">Минимальный уровень</th>
+            <th scope="col">Изменить</th>
+        </tr>
         </thead>
         <tbody>
-            {% for enemy in enemies %}
-                <tr>
-                    <th scope="row">{{ enemy[0] }}</th>
-                    <th scope="row">{{ enemy[1] }}</th>
-                    <td align="center">{{ enemy[2] }}</td>
-                </tr>
-            {% endfor %}
+        {% for enemy in enemies %}
+        <tr>
+            <td scope="row">{{ enemy[1] }}</td>
+            <td>{{ enemy[2] }}</td>
+            <td align="center">{{ enemy[3] }}</td>
+            <td>
+                <form>
+                    <a href="/new_enemy/{{ enemy[0] }}" class="btn btn-warning">Изменить</a>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
+    <a href="/new_enemy" class="btn btn-warning">Добавить</a>
 </div>
 {% endblock %}
