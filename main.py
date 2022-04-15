@@ -30,6 +30,12 @@ def main_page():
     return render_template('basic_template.html', heading='Тени Аркполиса')
 
 
+@app.route('/game')
+def game():
+    return render_template('game.html', heading='Тени Аркполиса')
+
+# <a class="btn btn-secondary" href="/game" role="button">Начать игру</a>
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = NewPlayerForm()
