@@ -43,11 +43,13 @@
             <td>
                 <form>
                     <a href="/new_item/{{ item[0] }}" class="btn btn-warning">Изменить</a>
+                    <a href="/items_delete/{{ item[0] }}" class="btn btn-danger">Удалить</a>
                 </form>
             </td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
+    <a href="/new_item" class="btn btn-warning">Добавить</a>
 </div>
 {% endblock %}
