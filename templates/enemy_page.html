@@ -21,19 +21,20 @@
         <tbody>
         {% for enemy in enemies %}
         <tr>
-            <td scope="row">{{ enemy[1] }}</td>
-            <td>{{ enemy[2] }}</td>
-            <td align="center">{{ enemy[3] }}</td>
-            <td>
-                <form>
-                    <a href="/new_enemy/{{ enemy[0] }}" class="btn btn-warning">Изменить</a>
+            <th scope="row">{{ enemy[1] }}</th>
+            <th>{{ enemy[2] }}</th>
+            <th align="center">{{ enemy[3] }}</th>
+            <th>
+                <p>
+                    <a href="/edit_enemy/{{ enemy[0] }}" class="btn btn-warning">Изменить</a>
+                    <br>
                     <a href="/enemy_delete/{{ enemy[0] }}" class="btn btn-danger">Удалить</a>
-                </form>
-            </td>
+                </p>
+            </th>
         </tr>
         {% endfor %}
         </tbody>
     </table>
-    <a href="/new_enemy" class="btn btn-warning">Добавить</a>
+    <a href="/new_enemy" class="btn btn-success">Добавить</a><br><br>
 </div>
 {% endblock %}

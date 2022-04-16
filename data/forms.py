@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import EmailField, PasswordField, StringField, SubmitField, RadioField, DecimalField, BooleanField
+from wtforms import EmailField, PasswordField, StringField, SubmitField, RadioField, IntegerField, BooleanField
 from wtforms.validators import DataRequired
 
 
@@ -35,10 +35,10 @@ class NewItemForm(FlaskForm):
                                            (11, 'Оружие-Уникальное'), (12, 'Другое-Предмет для события'),
                                            (13, 'Другое-На продажу')],
                            validators=[DataRequired()])
-    protection = DecimalField('Защита (поставьте 0 если нет)')
-    attack = DecimalField('Атака (поставьте 0 если нет)')
+    protection = IntegerField('Защита (поставьте 0 если нет)')
+    attack = IntegerField('Атака (поставьте 0 если нет)')
     class_required = RadioField('Необходимый класс', choices=[(1, 'Страж'), (2, 'Стрелок'), (3, 'Тень')])
-    cost = DecimalField('Цена', validators=[DataRequired()])
+    cost = IntegerField('Цена', validators=[DataRequired()])
     submit = SubmitField('Создать предмет!')
 
 
@@ -51,5 +51,11 @@ class NewEnemyForm(FlaskForm):
                                    (8, 'Отдел тестирования боевого снаряжения'), (9, 'Орудийные цехи НИО'),
                                    (10, 'Свалка Аркполиса'), (11, 'Куча металлолома'),
                                    (12, 'Мусорная пещера'), (13, 'Радиоактивное болото')], validators=[DataRequired()])
-    min_level = DecimalField('Минимальный уровень монстра', validators=[DataRequired()])
+    min_level = IntegerField('Минимальный уровень монстра', validators=[DataRequired()])
     submit = SubmitField('Добавить врага')
+
+
+class AttackForm(FlaskForm):
+    attack_type = RadioField('Каким ударом вы хотите атаковать?',
+                             choices=[(1, 'Базовая атака'), (2, 'Специальная атака')], validators=[DataRequired()])
+    submit = SubmitField('Атакаовать!')
