@@ -8,6 +8,7 @@ from data.models.location import Location
 from data.models.enemy import Enemy
 from data.models.items import Items
 from data.models.item_type import ItemType
+from data.extra_functions import *
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from random import choice
@@ -274,7 +275,11 @@ def edit_item(item_id):
 @login_required
 def un_equip_item(item_id):
     db_sess = db_session.create_session()
-    if item_id in current_user.equipped:
+    try:
+        check = item_id in current_user.equipped
+    except TypeError:
+        check = False
+    if check:
         old_equipped = current_user.equipped.split(',')
         i = old_equipped.index(item_id)
         new_equipped = ','.join(old_equipped[:i] + old_equipped[i + 1:])
@@ -306,7 +311,11 @@ def un_equip_item(item_id):
 def equip_item(item_id):
     db_sess = db_session.create_session()
     our_item = db_sess.query(Items).filter(Items.id == int(item_id)).first()
-    if item_id in current_user.inventory:
+    try:
+        check = item_id in current_user.inventory
+    except TypeError:
+        check = False
+    if check:
         if our_item.class_required == current_user.player_class:
             if not current_user.equipped:
                 flag = True
@@ -359,7 +368,11 @@ def equip_item(item_id):
 @login_required
 def sell_item(item_id):
     db_sess = db_session.create_session()
-    if item_id in current_user.inventory:
+    try:
+        check = item_id in current_user.inventory
+    except TypeError:
+        check = False
+    if check:
         old_inventory = current_user.inventory.split(',')
         i = old_inventory.index(item_id)
         new_inventory = ','.join(old_inventory[:i] + old_inventory[i + 1:])
@@ -412,17 +425,42 @@ def inventory_page():
     return render_template('inventory_page.html', money=money, heading='Ваш инвентарь', bag=items, items_on=items_2)
 
 
-# @app.route('/adventure', methods=['GET', 'POST'])
-# @login_required
-# def adventure_page():
-#     db_sess = db_session.create_session()
-#     status = current_user.location.split('/')
-#     location = db_sess.query(Location).filter(Location.id == int(status[0]))
-#     occupation = status[1]
-#     if occupation == 'free':
-#         text = 'Вы ничем не заняты. Вы можете заняться своей экипировкой или исследовать эту локацию.'
-#     elif occupation == 'fighting':
-#         text = ''
+@app.route('/adventure', methods=['GET', 'POST'])
+@login_required
+def adventure_page():
+    db_sess = db_session.create_session()
+    status = current_user.location.split('/')
+    location = db_sess.query(Location).filter(Location.id == int(status[0]))
+    occupation = status[1]
+    loc_name = location.name
+    loc_text = location.description
+    if occupation == 'free':
+        occ_text = 'Вы ничем не заняты. Вы можете заняться своей экипировкой или исследовать эту локацию.'
+        form = ExploreButtonForm()
+        if form.validate_on_submit():
+            number = randint(1, 100)
+            if number in range(1, 6):
+                doing = f'{status[0]}/solving/{randint(1, 6)}'
+            elif number in range(6, 11):
+                doing = f'{status[0]}/buying'
+            else:
+                monster = choice(db_sess.query(Enemy).filter(Enemy.location == status[0],
+                                                             Enemy.min_level >= current_user.level))
+                enemy_level = current_user.level + randint(-1, 1)
+                if enemy_level <= 0:
+                    enemy_level = 1
+                doing = f'{status[0]}/fighting/{monster.id}/{enemy_level}/{count_monster_hp(enemy_level)}'
+            player = db_sess.query(Player).filter(Player.id == current_user.id).first()
+            player.location = doing
+            db_sess.commit()
+        return render_template('adventure_page.html', heading='Приключение', form=form, occupation=occ_text,
+                               location=loc_text, place=loc_name)
+    elif occupation == 'fighting':
+        occ_text = ''
+    elif occupation == 'solving':
+        occ_text = ''
+    elif occupation == 'buying':
+        occ_text = ''
 
 
 if __name__ == '__main__':

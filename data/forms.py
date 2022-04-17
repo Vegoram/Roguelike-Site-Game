@@ -58,4 +58,8 @@ class NewEnemyForm(FlaskForm):
 class AttackForm(FlaskForm):
     attack_type = RadioField('Каким ударом вы хотите атаковать?',
                              choices=[(1, 'Базовая атака'), (2, 'Специальная атака')], validators=[DataRequired()])
-    submit = SubmitField('Атакаовать!')
+    submit = SubmitField('Атаковать!')
+
+
+class ExploreButtonForm(FlaskForm):
+    submit = SubmitField('Исследовать')
