@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request
-from data import db_session
+from flask import Flask, render_template, request, jsonify, make_response
+from data import db_session, enemy_api
 from werkzeug.utils import redirect
 from werkzeug.exceptions import abort
 from data.models.player import Player
@@ -11,6 +11,7 @@ from data.models.item_type import ItemType
 from data.extra_functions import *
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import abort, Api
 from random import choice
 
 MESSAGES = {'low_access': 'У вас недостаточно прав для выполнения данного действия!',
@@ -23,9 +24,21 @@ MESSAGES = {'low_access': 'У вас недостаточно прав для в
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
+api = Api(app)
 app.config['SECRET_KEY'] = '3yzwyB8X88GaxcWDLkmFXG05GC0brVLKCTJFtr1'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+def main():
+    db_session.global_init("db/game_database.db")
+    app.register_blueprint(enemy_api.blueprint)
+    app.run()
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 @login_manager.user_loader
