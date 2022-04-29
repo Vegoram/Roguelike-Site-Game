@@ -6,6 +6,8 @@
 
 body {
     background-image: url(../img/background.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: 'CustomFont';
     color: #eeeeee;
 }
@@ -21,6 +23,7 @@ div {
     width: 65%;
     border-radius: 7px;
     border: 1px solid #ffffff;
+    padding: 10px;
 }
 
 

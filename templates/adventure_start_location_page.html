@@ -1,0 +1,14 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p align="left">Вы стоите на городской площади. Сюда попадают все новоприбывшие. Пожалуй, это единственное место в городе, где вы можете чувствовать себя в безопасности.</p><hr>
+    <p align="left">Куда же вы отправитесь?</p>
+    {% for variant in variants %}
+        <p align="left">
+            <a class="btn btn-secondary" href="/change_location/{{ loop.index + 1 }}" role="button">{{ variant[0] }}</a> - минимальный уровень {{ variant[1] }}
+        </p>
+    {% endfor %}
+</div>
+{% endblock %}

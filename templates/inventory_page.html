@@ -2,7 +2,10 @@
 
 {% block content %}
 <br><br>
-<div align="center" class="centred_div table_div"><br>
+<div align="center" class="centred_div table_div">
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    <a class="btn btn-secondary" href="/adventure" role="button">Приключение</a>
+    <br><hr><br>
     <h2>У вас есть:</h2><br>
     <p align="left">На вашем счету: {{ money }} кредитов.</p>
     {% if bag != [] %}

@@ -1,0 +1,17 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    <br><hr><br>
+    <h1>Справочник</h1>
+    {% for page in pages %}
+        {% if not loop.index0 %}
+            <br><hr><br>
+        {% endif %}
+        <h3>{{ page[0] }}</h3>
+        <p align="left">{{ page[1] }}</p>
+    {% endfor %}
+</div>
+{% endblock %}

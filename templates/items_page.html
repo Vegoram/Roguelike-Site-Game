@@ -3,7 +3,6 @@
 {% block content %}
 <br><br>
 <div align="center" class="centred_div table_div">
-    <br>
     <a class="btn btn-secondary" href="/" role="button">На главную</a>
     <br><hr><br>
     <h1 align="center">Список вещей:</h1><br>
@@ -23,25 +22,25 @@
         <tbody>
             {% for item in items %}
                 <tr>
-                    <th scope="row">{{ item[0] }}</th>
-                    <th>{{ item[1] }}</th>
+                    <th scope="row">{{ item[1] }}</th>
                     <th>{{ item[2] }}</th>
-                    {% if item[3] != 0 %}
-                        <th>{{ item[3] }}</th>
-                    {% else %}
-                        <th>Нет</th>
-                    {% endif %}
+                    <th>{{ item[3] }}</th>
                     {% if item[4] != 0 %}
                         <th>{{ item[4] }}</th>
                     {% else %}
                         <th>Нет</th>
                     {% endif %}
-                    <th>{{ item[5] }}</th>
+                    {% if item[5] != 0 %}
+                        <th>{{ item[5] }}</th>
+                    {% else %}
+                        <th>Нет</th>
+                    {% endif %}
                     <th>{{ item[6] }}</th>
+                    <th>{{ item[7] }}</th>
                     <th>
                         <p>
                             <a href="/edit_item/{{ item[0] }}" class="btn btn-warning">Изменить</a>
-                            <a href="/items_delete/{{ item[0] }}" class="btn btn-danger">Удалить</a>
+                            <a href="/delete_item/{{ item[0] }}" class="btn btn-danger">Удалить</a>
                         </p>
                     </th>
                 </tr>

@@ -1,0 +1,28 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p align="left">Вы находитесь в локации {{ place }}</p><hr>
+    <p align="left">{{ location }}</p><hr>
+    <p align="left">Перед вами медленно, словно нехотя, проявляется светящийся знак, оставленный Древними. Под ним требовательно открывается маленькое окошечко.</p><hr>
+    <img align="center" src="../static/img/{{ image }}.png"><hr>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.item_type.label }}<br>
+            {% for radio_button in form.item_type %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.item_type.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+    </form>
+</div>
+{% endblock %}

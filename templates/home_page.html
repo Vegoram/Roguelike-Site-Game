@@ -1,0 +1,34 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    {% if current_user.is_authenticated %}
+        <p>Приветствую, {{ current_user.nickname }}!</p>
+        <p>
+            <a class="btn btn-secondary" href="/profile">Профиль</a>
+            <a class="btn btn-secondary" href="/inventory">Инвентарь</a>
+            <a class="btn btn-secondary" href="/adventure">Приключение</a>
+            <a class="btn btn-secondary" href="/guide">Справочник</a>
+        </p>
+    {% else %}
+        <p>К сожалению, я вас не узнаю...</p>
+        <p>
+            <a class="btn btn-success" href="/register">Зарегистрироваться</a>
+            <a class="btn btn-primary" href="/login">Войти</a>
+        </p>
+    {% endif %}
+    {% if access %}
+        <hr><br>
+        <p>Админские возможности</p>
+        <p>
+            <a class="btn btn-success" href="/new_item">Добавить предмет</a>
+            <a class="btn btn-success" href="/new_enemy">Добавить врага</a>
+        </p>
+        <p>
+            <a class="btn btn-secondary" href="/items_table">Просмотр предметов</a>
+            <a class="btn btn-secondary" href="/enemy_table">Просмотр врагов</a>
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
