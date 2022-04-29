@@ -753,7 +753,7 @@ def adventure_page():
                     get_free()
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_success'])
-            return render_template('adventure_solving_page.html', heading='Приключение', form=form,
+            return render_template('adventure_buying_page.html', heading='Приключение', form=form,
                                    location=loc_text, place=loc_name)
     else:
         variants = []
