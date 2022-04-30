@@ -1,0 +1,80 @@
+@font-face {
+	font-family: 'CustomFont';
+	src: url(../fonts/pixel.ttf);
+}
+
+
+body {
+    background-image: url(../img/background.jpg);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'CustomFont';
+    color: #eeeeee;
+}
+
+
+form {
+    min-width: 500px;
+}
+
+div {
+    background-color: #111110;
+    min-width: 520px;
+    width: 65%;
+    border-radius: 7px;
+    border: 1px solid #ffffff;
+    padding: 10px;
+}
+
+
+hr {
+    border: none;
+    color: #99b7a0;
+    background-color: #99b7a0;
+    height: 1px;
+}
+
+
+h1 {
+    font-size: 40px;
+}
+
+
+form {
+    width: 450px;
+}
+
+.table_div {
+    width: 95%;
+}
+
+
+.centred_div {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.heading_text {
+    color: #519e7f;
+}
+
+
+.header_div {
+    width: 33%;
+    min-height: 120px;
+    padding: 15px;
+    float: left;
+    margin-left: 10px;
+}
+
+
+.user_div {
+    display: block;
+    margin-left: auto;
+    width: 25%;
+    min-height: 120px;
+    padding: 15px;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}

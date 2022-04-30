@@ -1,0 +1,105 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div table_div">
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    <a class="btn btn-secondary" href="/adventure" role="button">Приключение</a>
+    <a class="btn btn-secondary" href="/guide">Справочник</a>
+    <br><hr><br>
+    <h2>У вас есть:</h2><br>
+    <p align="left">На вашем счету: {{ money }} кредитов.</p>
+    {% if bag != [] %}
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Название предмета</th>
+                    <th scope="col">Качество</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Защита</th>
+                    <th scope="col">Атака</th>
+                    <th scope="col">Необходимый класс</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bag %}
+                    <tr>
+                        <th scope="row">{{ item[0] }}</th>
+                        <th>{{ item[1] }}</th>
+                        <th>{{ item[2] }}</th>
+                        {% if item[3] != 0 %}
+                            <th>{{ item[3] }}</th>
+                        {% else %}
+                            <th>Нет</th>
+                        {% endif %}
+                        {% if item[4] != 0 %}
+                            <th>{{ item[4] }}</th>
+                        {% else %}
+                            <th>Нет</th>
+                        {% endif %}
+                        <th>{{ item[5] }}</th>
+                        <th>{{ item[6] }}</th>
+                        <th>
+                            <p>
+                                {% if item[8] %}
+                                    <a href="/equip_item/{{ item[7] }}" class="btn btn-success">Надеть</a>
+                                {% endif %}
+                                <a href="/sell_item/{{ item[7] }}" class="btn btn-danger">Продать</a>
+                            </p>
+                        </th>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>У вас пока нет ни одной вещи</p>
+    {% endif %}
+    <br><hr><br>
+    <h2>Экипировано:</h2><br>
+    {% if items_on != [] %}
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">Название предмета</th>
+                    <th scope="col">Качество</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Защита</th>
+                    <th scope="col">Атака</th>
+                    <th scope="col">Необходимый класс</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items_on %}
+                    <tr>
+                        <th scope="row">{{ item[0] }}</th>
+                        <th>{{ item[1] }}</th>
+                        <th>{{ item[2] }}</th>
+                        {% if item[3] != 0 %}
+                            <th>{{ item[3] }}</th>
+                        {% else %}
+                            <th>Нет</th>
+                        {% endif %}
+                        {% if item[4] != 0 %}
+                            <th>{{ item[4] }}</th>
+                        {% else %}
+                            <th>Нет</th>
+                        {% endif %}
+                        <th>{{ item[5] }}</th>
+                        <th>{{ item[6] }}</th>
+                        <th>
+                            <p>
+                                <a href="/un_equip_item/{{ item[7] }}" class="btn btn-danger">Снять</a>
+                            </p>
+                        </th>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Вы пока ничего не экипировали</p>
+    {% endif %}
+</div>
+<br>
+{% endblock %}

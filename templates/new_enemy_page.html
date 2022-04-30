@@ -1,0 +1,49 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    <br><hr><br>
+    <h1 align="center">Добавление врага</h1>
+    {% if message %}
+        <div class='alert alert-danger' role="alert">{{ message }}!</div>
+    {% endif %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(class="form-control") }}<br>
+            {% for error in form.name.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.location.label }}<br>
+            {% for radio_button in form.location %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.location.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.min_level.label }}<br>
+            {{ form.min_level(class="form-control") }}<br>
+            {% for error in form.min_level.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+    </form>
+    <br>
+</div>
+{% endblock %}

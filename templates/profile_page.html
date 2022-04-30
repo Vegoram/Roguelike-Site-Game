@@ -1,0 +1,18 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    <a class="btn btn-secondary" href="/adventure" role="button">Приключение</a>
+    <br><hr><br>
+    <p align="left">ФИ пользователя: {{ name }}</p>
+    <p align="left">Игровой никнейм: {{ nickname }}</p>
+    <p align="left">Уровень: {{ level }}</p>
+    <p align="left">Опыт: {{ exp }}</p>
+    <p align="left">Здоровье: {{ health }}</p>
+    <p align="left">Класс: {{ player_class }}</p>
+    <a class="btn btn-secondary" href="/inventory" role="button">Инвентарь</a>
+    <a class="btn btn-secondary" href="/guide">Справочник</a>
+</div>
+{% endblock %}

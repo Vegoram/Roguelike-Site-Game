@@ -1,0 +1,12 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p>{{ message }}</p>
+    <a class="btn btn-secondary" href="/" role="button">На главную</a>
+    {% if button != 'no' %}
+        <a class="btn btn-secondary" href="/{{ button }}" role="button">Вернуться</a>
+    {% endif %}
+</div>
+{% endblock %}

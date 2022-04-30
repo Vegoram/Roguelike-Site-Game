@@ -1,0 +1,31 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p align="left">Вы находитесь в локации {{ place }}</p><hr>
+    <p align="left">{{ location }}</p><hr>
+    <p align="left">Вы встречаете странного грязного робота. Он предлагает вам на выбор 6 сундучков:</p><hr>
+    <p>
+        <a class="btn btn-secondary" href="/inventory" role="button">Инвентарь</a>
+        <a class="btn btn-secondary" href="/guide" role="button">Справочник</a>
+    </p>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.box_type.label }}<br>
+            {% for radio_button in form.box_type %}
+                <p align="left">
+                    {{ radio_button }} {{ radio_button.label }}
+                </p>
+            {% endfor %}
+            {% for error in form.box_type.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+    </form>
+</div>
+{% endblock %}

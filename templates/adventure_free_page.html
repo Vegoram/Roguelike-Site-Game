@@ -1,0 +1,19 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p align="left">Вы находитесь в локации {{ place }}</p><hr>
+    <p align="left">{{ location }}</p><hr>
+    <p align="left">Вы ничем не заняты. Вы можете заняться своей экипировкой, исследовать эту локацию или вернуться на площадь.</p><hr>
+    {% if additional_text %}
+        <p align="left">{{ additional_text }}</p><hr>
+    {% endif %}
+    <p>
+        <a class="btn btn-secondary" href="/explore" role="button">Исследовать локацию</a>
+        <a class="btn btn-secondary" href="/inventory" role="button">Инвентарь</a>
+        <a class="btn btn-secondary" href="/profile">Профиль</a>
+        <a class="btn btn-secondary" href="/change_location/1" role="button">Вернуться на площадь</a>
+    </p>
+</div>
+{% endblock %}

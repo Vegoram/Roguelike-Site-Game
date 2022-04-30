@@ -1,0 +1,15 @@
+{% extends "basic_template.html" %}
+
+{% block content %}
+<br><br>
+<div align="center" class="centred_div">
+    <p align="left">Вы находитесь в локации {{ place }}</p><hr>
+    <p align="left">Вы сражаетесь с {{ enemy_name }} {{ enemy_level }} уровня!</p><hr>
+    <p align="left">Ваше здоровье: {{ player_hp }} &#10084;<br>Здоровье врага: {{ enemy_hp }} &#128420;</p><hr>
+    <p>
+        Что вы сделаете?<br>
+        <a class="btn btn-secondary" href="/turn" role="button">Атаковать</a>
+        <a class="btn btn-secondary" href="/get_free" role="button">Сбежать</a>
+    </p>
+</div>
+{% endblock %}
