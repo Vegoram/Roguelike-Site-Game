@@ -1,6 +1,6 @@
 from os import listdir
-from flask import Flask, render_template, request
-from data import db_session
+from flask import Flask, render_template, request, jsonify, make_response
+from data import db_session, enemy_api
 from werkzeug.utils import redirect
 from werkzeug.exceptions import abort
 from data.models.player import Player
@@ -11,6 +11,7 @@ from data.models.items import Items
 from data.models.item_type import ItemType
 from data.formulas import *
 from data.forms import *
+from flask_restful import abort, Api
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from random import choice
 
@@ -48,9 +49,15 @@ ITEM_DROP_CHANCES = {1: (0, 0, 0, 5, 30, 100),
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
+api = Api(app)
 app.config['SECRET_KEY'] = '3yzwyB8X88GaxcWDLkmFXG05GC0brVLKCTJFtr1'
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 @login_manager.user_loader
@@ -751,4 +758,5 @@ def adventure_page():
 
 
 if __name__ == '__main__':
+    app.register_blueprint(enemy_api.blueprint)
     app.run(port=8080, host='127.0.0.1')  # Запуск приложения
