@@ -84,4 +84,3 @@ class BuyingForm(FlaskForm):
                                     'богато украшенный золотом - цена 480 кредитов')],
                           validators=[DataRequired()])
     submit = SubmitField('Купить!')
-

@@ -1,11 +1,6 @@
-<<<<<<< HEAD
 from os import listdir
 from flask import Flask, render_template, request
 from data import db_session
-=======
-from flask import Flask, render_template, request, jsonify, make_response
-from data import db_session, enemy_api
->>>>>>> 311da69a0d44d558db82a6300ccb202066decaa1
 from werkzeug.utils import redirect
 from werkzeug.exceptions import abort
 from data.models.player import Player
@@ -17,10 +12,12 @@ from data.models.item_type import ItemType
 from data.formulas import *
 from data.forms import *
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from flask_restful import abort, Api
 from random import choice
 
-MESSAGES = {'low_access': 'У вас недостаточно прав для выполнения данного действия!',
+
+# Создаю словарь с расшифровкой кодов сообщений
+MESSAGES = {'register_success': 'Вы успешно зарегистрировались! Теперь выполните вход.',
+            'low_access': 'У вас недостаточно прав для выполнения данного действия!',
             'enemy_success': 'Вы успешно добавили врага!',
             'item_success': 'Вы успешно добавили предмет!',
             'sell_success': 'Вы успешно продали вещь!',
@@ -36,12 +33,14 @@ MESSAGES = {'low_access': 'У вас недостаточно прав для в
             'level_too_small': 'У вас слишком маленький уровень!',
             'busy': 'Вы должны быть свободны для выполнения этого действия',
             'wrong_location': 'Вы не можете выполнять это действие в текущей локации'}
+# Словарь с расшифровкой кодов сообщений завершения событий
 ADDITIONAL_TEXTS = {'solve_success': 'Вы успешно решили головоломку! Предмет добавлен в инвентарь.',
                     'solve_fail': 'К сожалению, это неверное решение...',
                     'fight_success': 'Вы одержали победу в схватке!',
                     'fight_fail': 'К сожалению, вы потерпели поражение...',
                     'buy_success': 'Вы успешно приобрели предмет!',
                     'buy_fail': 'Вы ушли, ничего не купив'}
+# Шансы выпадения вещи в зависимости от ключа - уровня локации
 ITEM_DROP_CHANCES = {1: (0, 0, 0, 5, 30, 100),
                      10: (0, 0, 5, 30, 70, 100),
                      20: (0, 1, 15, 50, 90, 100),
@@ -49,21 +48,9 @@ ITEM_DROP_CHANCES = {1: (0, 0, 0, 5, 30, 100),
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
-api = Api(app)
 app.config['SECRET_KEY'] = '3yzwyB8X88GaxcWDLkmFXG05GC0brVLKCTJFtr1'
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
-def main():
-    db_session.global_init("db/game_database.db")
-    app.register_blueprint(enemy_api.blueprint)
-    app.run()
-
-
-@app.errorhandler(404)
-def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 @login_manager.user_loader
@@ -72,14 +59,15 @@ def load_user(player_id):
     return db_sess.query(Player).get(player_id)
 
 
-@app.route('/')
+@app.route('/')  # Пустая главная страница
 def main_page():
     db_sess = db_session.create_session()
     access = current_user.is_authenticated and current_user in db_sess.query(Player).filter(Player.id.in_([1, 2, 3]))
+    # access - является ли пользователь админом
     return render_template('home_page.html', heading='Тени Аркполиса', access=access)
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])  # Регистрация нового пользователя
 def register():
     form = NewPlayerForm()
     if form.validate_on_submit():
@@ -92,7 +80,7 @@ def register():
             return render_template('registration_page.html', heading='Регистрация',
                                    form=form,
                                    message='Пользователь с такой почтой уже есть')
-        if form.player_class.data == 1:
+        if form.player_class.data == 1:  # Классу "Страж" изначально выдаются доп. жизни
             health = '40'
         else:
             health = '30'
@@ -111,11 +99,11 @@ def register():
         player.set_password(form.password.data)
         db_sess.add(player)
         db_sess.commit()
-        return redirect('/')
+        return redirect('/message/register_success/no')
     return render_template('registration_page.html', heading='Регистрация', form=form)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])  # Авторизация
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -130,14 +118,14 @@ def login():
     return render_template('autorisation_page.html', title='Авторизация', form=form)
 
 
-@app.route('/logout')
+@app.route('/logout')  # Выход из учетной записи
 @login_required
 def logout():
     logout_user()
     return redirect('/')
 
 
-@app.route('/profile')
+@app.route('/profile')  # Страница с профилем игрока
 @login_required
 def profile():
     db_sess = db_session.create_session()
@@ -150,13 +138,13 @@ def profile():
                            level=level, exp=exp, health=health, player_class=player_class)
 
 
-@app.route('/guide')
+@app.route('/guide')  # Справочник, который автоматически составляется из текстовых файлов в нужном каталоге
 @login_required
 def guide():
     page_names = filter(lambda x: x.endswith('.txt'), listdir('./data/guide_pages'))
     pages = []
     for page_name in page_names:
-        with open(page_name) as file:
+        with open(f'./data/guide_pages/{page_name}') as file:
             data = list(map(lambda x: x.strip(), file.readlines()))
         heading = data[0]
         text = ' '.join(data[1:])
@@ -164,19 +152,21 @@ def guide():
     return render_template('guide_page.html', heading='Справочник', pages=pages)
 
 
-@app.route('/message/<text>/<second_button>')
+@app.route('/message/<text>/<second_button>')  # Страница с сообщением о чем-то
+# Параметр second_button определяет, есть ли вторая кнопка, и если да, то указывает куда эта кнопка ведет
 def message(text, second_button):
     try:
         t = MESSAGES[text]
-    except KeyError as e:
+    except KeyError:
         t = 'Произошла ошибка!'
     return render_template('message_page.html', heading='Внимание!', button=second_button, message=t)
 
 
-@app.route('/new_enemy', methods=['GET', 'POST'])
+@app.route('/new_enemy', methods=['GET', 'POST'])  # Форма для добавления врага
 @login_required
 def new_enemy():
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
         return redirect('/message/low_access/no')
     form = NewEnemyForm()
@@ -198,10 +188,11 @@ def new_enemy():
     return render_template('new_enemy_page.html', heading='Новый враг', form=form)
 
 
-@app.route('/new_item', methods=['GET', 'POST'])
+@app.route('/new_item', methods=['GET', 'POST'])  # Форма для добавления нового предмета
 @login_required
 def new_item():
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
         return redirect('/message/low_access')
     form = NewItemForm()
@@ -231,15 +222,16 @@ def new_item():
     return render_template('new_item_page.html', heading='Новый предмет', form=form)
 
 
-@app.route('/items_table', methods=['GET', 'POST'])
+@app.route('/items_table', methods=['GET', 'POST'])  # Таблица, показывающая все предметы в игре
 @login_required
 def items_table():
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
         return redirect('/message/low_access')
     i = db_sess.query(Items).filter(Items.id > 0)
     items = []
-    for thing in i:
+    for thing in i:  # Составляем список списков со всей нужной информацией по каждому предмету
         req_class = db_sess.query(PlayerClass).filter(PlayerClass.id == thing.class_required).first().name
         mini = [thing.id, thing.name, thing.rarity, thing.item_type.name,
                 thing.protection, thing.attack, req_class, thing.cost]
@@ -247,28 +239,31 @@ def items_table():
     return render_template('items_page.html', heading='Просмотр вещей', items=items)
 
 
-@app.route('/enemy_table', methods=['GET', 'POST'])
+@app.route('/enemy_table', methods=['GET', 'POST'])  # Таблица, показывающая всех врагов в игре
 @login_required
 def enemy_table():
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
         return redirect('/message/low_access')
     i = db_sess.query(Enemy)
     enemies = []
-    for antagonist in i:
+    for antagonist in i:  # Составляем список списков со всей нужной информацией по каждому врагу
         mini = [antagonist.id, antagonist.name, antagonist.located.name, antagonist.min_level]
         enemies.append(mini)
     return render_template('enemy_page.html', heading='Просмотр врагов', enemies=enemies)
 
 
-@app.route('/edit_enemy/<int:enemy_id>', methods=['GET', 'POST'])
+@app.route('/edit_enemy/<int:enemy_id>', methods=['GET', 'POST'])  # Форма редактирования врага по id
 @login_required
 def edit_enemy(enemy_id):
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([0, 2, 3])):
         return redirect('/message/low_access')
     form = NewEnemyForm()
-    if request.method == "GET":
+    # Заполнение полей формы
+    if request.method == 'GET':
         db_sess = db_session.create_session()
         enemy = db_sess.query(Enemy).filter(Enemy.id == enemy_id).first()
         if enemy:
@@ -291,14 +286,16 @@ def edit_enemy(enemy_id):
     return render_template('new_enemy_page.html', heading='Редактирование врага', form=form)
 
 
-@app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
+@app.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])  # Форма редактирования предмета по id
 @login_required
 def edit_item(item_id):
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
     if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
         return redirect('/message/low_access')
     form = NewItemForm()
-    if request.method == "GET":
+    # Заполнение полей формы
+    if request.method == 'GET':
         db_sess = db_session.create_session()
         items = db_sess.query(Items).filter(Items.id == item_id).first()
         if items:
@@ -333,10 +330,13 @@ def edit_item(item_id):
     return render_template('new_item_page.html', heading='Редактирование предмета', form=form)
 
 
-@app.route('/delete_enemy/<int:enemy_id>', methods=['GET', 'POST'])
+@app.route('/delete_enemy/<int:enemy_id>', methods=['GET', 'POST'])  # Удаление врага по id
 @login_required
 def delete_enemy(enemy_id):
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
+    if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
+        return redirect('/message/low_access')
     enemy = db_sess.query(Enemy).filter(Enemy.id == enemy_id).first()
     if enemy:
         db_sess.delete(enemy)
@@ -346,10 +346,13 @@ def delete_enemy(enemy_id):
         return redirect('/message/del_enemy_fail/enemy_table')
 
 
-@app.route('/delete_item/<int:item_id>', methods=['GET', 'POST'])
+@app.route('/delete_item/<int:item_id>', methods=['GET', 'POST'])  # Удаление предмета по id
 @login_required
 def delete_item(item_id):
     db_sess = db_session.create_session()
+    # Проверка, является ли пользователь админом
+    if current_user not in db_sess.query(Player).filter(Player.id.in_([1, 2, 3])):
+        return redirect('/message/low_access')
     item = db_sess.query(Items).filter(Items.id == item_id).first()
     if item:
         db_sess.delete(item)
@@ -359,37 +362,29 @@ def delete_item(item_id):
         return redirect('/message/del_item_fail/items_table')
 
 
+# Функция для снятия предмета с игрока и перемещения его в инвентарь
 @app.route('/un_equip_item/<item_id>', methods=['GET', 'POST'])
 @login_required
 def un_equip_item(item_id):
     status = current_user.location.split('/')
-    if status[1] != 'free':
+    if status[1] != 'free':  # Проверка на то, свободен ли пользователь
         return redirect('/message/busy/adventure')
     db_sess = db_session.create_session()
-    try:
+    try:  # Проверка на то, надета ли эта вещь на него
         check = item_id in current_user.equipped
-    except TypeError:
+    except TypeError:  # Исключение ошибки если у пользователя ничего не надето
         check = False
     if check:
         old_equipped = current_user.equipped.split(',')
         i = old_equipped.index(item_id)
         new_equipped = ','.join(old_equipped[:i] + old_equipped[i + 1:])
-        if current_user.inventory:
+        if current_user.inventory:  # Если инвентарь пустой, то добавляем с запятой, если нет то просто
             new_inventory = current_user.inventory + ',' + item_id
         else:
             new_inventory = item_id
         player = db_sess.query(Player).filter(Player.id == current_user.id).first()
-        player.email = current_user.email
-        player.name = current_user.name
-        player.surname = current_user.surname
-        player.nickname = current_user.nickname
         player.inventory = new_inventory
         player.equipped = new_equipped
-        player.money = current_user.money
-        player.location = current_user.location
-        player.player_class = current_user.player_class
-        player.hp = current_user.hp
-        player.level = current_user.level
         db_sess.commit()
         text = 'un_equip_success'
     else:
@@ -397,37 +392,40 @@ def un_equip_item(item_id):
     return redirect(f'/message/{text}/inventory')
 
 
+# Функция для экипирования какого-либо предмета из инвентаря
 @app.route('/equip_item/<item_id>', methods=['GET', 'POST'])
 @login_required
 def equip_item(item_id):
     status = current_user.location.split('/')
-    if status[1] != 'free':
+    if status[1] != 'free':  # Проверка на то, свободен ли пользователь
         return redirect('/message/busy/adventure')
     db_sess = db_session.create_session()
-    our_item = db_sess.query(Items).filter(Items.id == int(item_id)).first()
-    try:
+    item_to_equip = db_sess.query(Items).filter(Items.id == int(item_id)).first()
+    try:  # Проверка на то, есть ли эта вещь у него
         check = item_id in current_user.inventory
-    except TypeError:
+    except TypeError:  # Исключение ошибки если у пользователя ничего нет
         check = False
     if check:
-        if our_item.class_required == current_user.player_class:
+        if item_to_equip.class_required == current_user.player_class:
+            # Дальше идут переборы инвентаря чтобы проверить, не надета ли ещё одна вещь такого типа
+            # Например, нельзя надеть два шлема или две пары сапог
             if not current_user.equipped:
                 flag = True
-            elif our_item.item_type_id in range(1, 5):
+            elif item_to_equip.item_type_id in range(1, 5):
                 flag = True
                 for i_id in current_user.equipped.split(','):
-                    this_item = db_sess.query(Items).filter(Items.id == i_id).first()
-                    if this_item.item_type_id == our_item.item_type_id:
+                    checking_item = db_sess.query(Items).filter(Items.id == i_id).first()
+                    if checking_item.item_type_id == item_to_equip.item_type_id:
                         flag = False
                         break
             else:
                 flag = True
                 for i_id in current_user.equipped.split(','):
-                    this_item = db_sess.query(Items).filter(Items.id == i_id).first()
-                    if this_item.item_type_id in range(5, 12):
+                    checking_item = db_sess.query(Items).filter(Items.id == i_id).first()
+                    if checking_item.item_type_id in range(5, 12):
                         flag = False
                         break
-            if flag:
+            if flag:  # Если все корректно, то надеваем вещь
                 old_inventory = current_user.inventory.split(',')
                 i = old_inventory.index(item_id)
                 new_inventory = ','.join(old_inventory[:i] + old_inventory[i + 1:])
@@ -436,17 +434,8 @@ def equip_item(item_id):
                 else:
                     new_equipped = item_id
                 player = db_sess.query(Player).filter(Player.id == current_user.id).first()
-                player.email = current_user.email
-                player.name = current_user.name
-                player.surname = current_user.surname
-                player.nickname = current_user.nickname
                 player.inventory = new_inventory
                 player.equipped = new_equipped
-                player.money = current_user.money
-                player.location = current_user.location
-                player.player_class = current_user.player_class
-                player.hp = current_user.hp
-                player.level = current_user.level
                 db_sess.commit()
                 text = 'equip_success'
             else:
@@ -458,16 +447,17 @@ def equip_item(item_id):
     return redirect(f'/message/{text}/inventory')
 
 
+# Функция для продажи предмета из инвентаря
 @app.route('/sell_item/<item_id>', methods=['GET', 'POST'])
 @login_required
 def sell_item(item_id):
     status = current_user.location.split('/')
-    if status[1] != 'free':
+    if status[1] != 'free':  # Проверка на то, свободен ли пользователь
         return redirect('/message/busy/adventure')
     db_sess = db_session.create_session()
-    try:
+    try:  # Проверка на то, есть ли эта вещь у него
         check = item_id in current_user.inventory
-    except TypeError:
+    except TypeError:  # Исключение ошибки если у пользователя ничего нет
         check = False
     if check:
         old_inventory = current_user.inventory.split(',')
@@ -475,17 +465,8 @@ def sell_item(item_id):
         new_inventory = ','.join(old_inventory[:i] + old_inventory[i + 1:])
         new_money = db_sess.query(Items).filter(Items.id == item_id).first().cost + current_user.money
         player = db_sess.query(Player).filter(Player.id == current_user.id).first()
-        player.email = current_user.email
-        player.name = current_user.name
-        player.surname = current_user.surname
-        player.nickname = current_user.nickname
         player.inventory = new_inventory
-        player.equipped = current_user.equipped
         player.money = new_money
-        player.location = current_user.location
-        player.player_class = current_user.player_class
-        player.hp = current_user.hp
-        player.level = current_user.level
         db_sess.commit()
         text = 'sell_success'
     else:
@@ -493,6 +474,7 @@ def sell_item(item_id):
     return redirect(f'/message/{text}/inventory')
 
 
+# Страница с инвентарем пользователя
 @app.route('/inventory', methods=['GET', 'POST'])
 @login_required
 def inventory_page():
@@ -500,7 +482,7 @@ def inventory_page():
     items = []
     items_2 = []
     money = current_user.money
-    if current_user.inventory:
+    if current_user.inventory:  # Перебор имеющихся предметов
         for t in current_user.inventory.split(','):
             thing = db_sess.query(Items).filter(Items.id == t).first()
             req_class = db_sess.query(PlayerClass).filter(PlayerClass.id == thing.class_required).first().name
@@ -510,7 +492,7 @@ def inventory_page():
             items.append(mini)
     else:
         items = []
-    if current_user.equipped:
+    if current_user.equipped:  # Перебор надетых предметов
         for t in current_user.equipped.split(','):
             thing = db_sess.query(Items).filter(Items.id == t).first()
             req_class = db_sess.query(PlayerClass).filter(PlayerClass.id == thing.class_required).first().name
@@ -522,36 +504,40 @@ def inventory_page():
     return render_template('inventory_page.html', money=money, heading='Ваш инвентарь', bag=items, items_on=items_2)
 
 
+# Функция, обрабатывающая ход пользователя во время битвы
 @app.route('/turn', methods=['GET', 'POST'])
 @login_required
 def turn():
     db_sess = db_session.create_session()
     info = current_user.location.split('/')
-    if info[1] == 'fighting':
+    if info[1] == 'fighting':  # Проверка на то, идет ли бой
         user_weapon_attack = 0
-        try:
+        try:  # Проверка на то, есть ли у пользователя надетые вещи
             equipment = current_user.equipped.split(',')
-        except Exception:
+        except Exception:  # Исключение если их у него нет
             equipment = []
-        for item_id in equipment:
+        for item_id in equipment:  # Перебор всех вещей, надетых на пользователя, и суммирование их атаки
             item = db_sess.query(Items).filter(Items.id == item_id).first()
             user_weapon_attack += item.attack
+        # Проверка на промах. Если пользователь - Тень, то он не промахивается
         if randint(1, 100) < 90 or current_user.player_class == 3:
             damage = count_attack(int(info[3])) + user_weapon_attack
         else:
             damage = 0
+        # Проверка на критический урон, если пользователь - Стрелок
         if current_user.player_class == 2 and randint(1, 100) < 15:
             damage = int(damage * 1.7)
         info[4] = str(int(info[4]) - damage)
         player = db_sess.query(Player).filter(Player.id == current_user.id).first()
         player.location = '/'.join(info)
         db_sess.commit()
-        get_damage()
+        if int(info[4]) > 0:  # Если враг ещё жив, то дальше атакует он
+            get_damage()
         return redirect('/adventure')
     return redirect('/message/busy/adventure')
 
 
-@app.route('/get_free', methods=['GET', 'POST'])
+@app.route('/get_free', methods=['GET', 'POST'])  # Метод, делающий пользователя не занятым ничем
 @login_required
 def get_free():
     db_sess = db_session.create_session()
@@ -562,22 +548,24 @@ def get_free():
     return redirect('/adventure')
 
 
+# Пользователь получает урон
 def get_damage():
     db_sess = db_session.create_session()
     info = current_user.location.split('/')
-    if info[1] == 'fighting':
+    if info[1] == 'fighting':  # Проверка на то, идет ли бой
         user_armor_protection = 0
-        try:
+        try:  # Проверка на то, есть ли у пользователя надетые вещи
             equipment = current_user.equipped.split(',')
-        except Exception:
+        except Exception:  # Исключение если их у него нет
             equipment = []
-        for item_id in equipment:
+        for item_id in equipment:  # Перебор всех вещей, надетых на пользователя, и суммирование их защиты
             item = db_sess.query(Items).filter(Items.id == item_id).first()
             user_armor_protection += item.protection
         damage = count_attack(int(info[3])) - user_armor_protection
         print(damage)
         if damage <= 0:
             damage = 1
+        # Если пользователь - Тень, то у него есть 15% шанс увернуться от атаки
         if current_user.player_class == 3 and randint(1, 100) < 15:
             damage = 0
         player = db_sess.query(Player).filter(Player.id == current_user.id).first()
@@ -587,21 +575,21 @@ def get_damage():
     return redirect('/message/busy/adventure')
 
 
-@app.route('/explore', methods=['GET', 'POST'])
+@app.route('/explore', methods=['GET', 'POST'])  # Функция генерирует пользователю занятие
 @login_required
 def exploring_page():
     status = current_user.location.split('/')
-    if status[1] != 'free':
+    if status[1] != 'free':  # Проверка на то, свободен ли пользователь
         return redirect('/message/busy/adventure')
     if status[0] == '1':
         return redirect('/message/wrong_location/adventure')
     db_sess = db_session.create_session()
     number = randint(1, 100)
-    if number in range(1, 6):
+    if number in range(1, 6):  # Выпала головоломка
         doing = f'{status[0]}/solving/{randint(0, 5)}'
-    elif number in range(6, 11):
+    elif number in range(6, 11):  # Выпала возможность купить
         doing = f'{status[0]}/buying'
-    else:
+    else:  # Выпало сражение с монстром
         monster = choice(list(db_sess.query(Enemy).filter(Enemy.location == status[0],
                                                           Enemy.min_level >= int(current_user.level.split('-')[1]))))
         if randint(1, 10) < 9:
@@ -617,15 +605,15 @@ def exploring_page():
     return redirect('/adventure')
 
 
-@app.route('/change_location/<int:location_id>', methods=['GET', 'POST'])
+@app.route('/change_location/<int:location_id>', methods=['GET', 'POST'])  # Меняет локацию пользователя
 @login_required
 def change_location_page(location_id):
     db_sess = db_session.create_session()
     status = current_user.location.split('/')
-    if status[1] != 'free':
+    if status[1] != 'free':  # Проверка на то, свободен ли пользователь
         return redirect('/message/busy/adventure')
     location = db_sess.query(Location).filter(Location.id == location_id).first()
-    if int(current_user.level.split('-')[1]) < int(location.level):
+    if int(current_user.level.split('-')[1]) < int(location.level):  # Проверка на то, подходит ли он по уровню
         return redirect('/message/level_too_small/adventure')
     player = db_sess.query(Player).filter(Player.id == current_user.id).first()
     player.location = f'{location_id}/free'
@@ -633,12 +621,12 @@ def change_location_page(location_id):
     return redirect('/adventure')
 
 
-def give_reward(rarity='random'):
+def give_reward(rarity='random'):  # Выдает пользователю предмет со случайной редкостью, если таковая не указана
     db_sess = db_session.create_session()
     location = db_sess.query(Location).filter(Location.id == current_user.location.split('/')[0]).first()
     if rarity == 'random':
         number = randint(1, 100)
-        drop_chances = ITEM_DROP_CHANCES[location.level]
+        drop_chances = ITEM_DROP_CHANCES[location.level]  # Получение шансов выпадения из словаря
         if number <= drop_chances[0]:
             rarity = 'Легендарное'
         elif number <= drop_chances[1]:
@@ -668,7 +656,7 @@ def give_reward(rarity='random'):
     db_sess.commit()
 
 
-def give_exp(number_of_exp=-1):
+def give_exp(number_of_exp=-1):  # Генерирует количество опыта, если оно не указано и выдает пользователю
     db_sess = db_session.create_session()
     if number_of_exp == -1:
         number_of_exp = count_exp(int(current_user.level.split('-')[1]))
@@ -685,13 +673,14 @@ def give_exp(number_of_exp=-1):
     db_sess.commit()
 
 
-def normalize_hp():
+def normalize_hp():  # Возвращает здоровье пользователя в норму
     db_sess = db_session.create_session()
     player = db_sess.query(Player).filter(Player.id == current_user.id).first()
     player.hp = str(count_player_hp(int(current_user.level.split('-')[1]), player.player_class == 1))
     db_sess.commit()
 
 
+# Функция, генерирующая страницу с игрой
 @app.route('/adventure', methods=['GET', 'POST'])
 @login_required
 def adventure_page():
@@ -701,16 +690,16 @@ def adventure_page():
     occupation = status[1]
     loc_name = location.name
     loc_text = location.description
-    if status[0] != '1':
-        if occupation == 'free':
+    if status[0] != '1':  # Проверка на то, что пользователь не находится в стартовой локации
+        if occupation == 'free':  # Пользователь свободен
             return render_template('adventure_free_page.html', heading='Приключение', location=loc_text, place=loc_name)
-        elif occupation == 'fighting':
-            if int(current_user.hp) <= 0:
+        elif occupation == 'fighting':  # Пользователь сражается
+            if int(current_user.hp) <= 0:  # Поражение
                 get_free()
                 normalize_hp()
                 return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                        place=loc_name, additional_text=ADDITIONAL_TEXTS['fight_fail'])
-            elif int(status[4]) <= 0:
+            elif int(status[4]) <= 0:  # Победа
                 give_reward()
                 normalize_hp()
                 give_exp()
@@ -720,18 +709,18 @@ def adventure_page():
             return render_template('adventure_fighting_page.html', heading='Приключение', place=loc_name,
                                    enemy_name=status[2], enemy_level=status[3], player_hp=current_user.hp,
                                    enemy_hp=status[4])
-        elif occupation == 'solving':
+        elif occupation == 'solving':  # Пользователь решает головоломку
             form = SolvingForm()
             if form.validate_on_submit():
                 answer = form.item_type.data
-                if answer == status[2]:
+                if answer == status[2]:  # Правильное решение
                     give_reward()
                     player = db_sess.query(Player).filter(Player.id == current_user.id).first()
                     player.location = f'{status[0]}/free'
                     db_sess.commit()
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['solve_success'])
-                else:
+                else:  # Неправильное решение
                     player = db_sess.query(Player).filter(Player.id == current_user.id).first()
                     player.location = f'{status[0]}/free'
                     db_sess.commit()
@@ -739,23 +728,22 @@ def adventure_page():
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['solve_fail'])
             return render_template('adventure_solving_page.html', heading='Приключение', form=form,
                                    location=loc_text, place=loc_name, image=status[2])
-        elif occupation == 'buying':
+        elif occupation == 'buying':  # Пользователь торгует
             form = BuyingForm()
             if form.validate_on_submit():
                 answer = form.box_type.data
-                if answer == 'no':
+                if answer == 'no':  # Если пользователь ушел
                     get_free()
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_fail'])
-                else:
+                else:  # Если что-то купил
                     give_reward(answer)
-                    give_exp()
                     get_free()
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_success'])
             return render_template('adventure_buying_page.html', heading='Приключение', form=form,
                                    location=loc_text, place=loc_name)
-    else:
+    else:  # Генерирование специальной страницы, если пользователь в стартовой локации
         variants = []
         for loc in db_sess.query(Location).filter(Location.id > 1):
             variants.append([loc.name, loc.level])
@@ -763,4 +751,4 @@ def adventure_page():
 
 
 if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
+    app.run(port=8080, host='127.0.0.1')  # Запуск приложения
