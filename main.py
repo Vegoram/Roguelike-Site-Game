@@ -40,12 +40,19 @@ ADDITIONAL_TEXTS = {'solve_success': 'Вы успешно решили голо�
                     'fight_success': 'Вы одержали победу в схватке!',
                     'fight_fail': 'К сожалению, вы потерпели поражение...',
                     'buy_success': 'Вы успешно приобрели предмет!',
+                    'buy_not_enough': 'Вам не хватает денег!',
                     'buy_fail': 'Вы ушли, ничего не купив'}
 # Шансы выпадения вещи в зависимости от ключа - уровня локации
 ITEM_DROP_CHANCES = {1: (0, 0, 0, 5, 30, 100),
                      10: (0, 0, 5, 30, 70, 100),
                      20: (0, 1, 15, 50, 90, 100),
                      40: (2, 5, 30, 70, 100, 100)}
+ITEM_COSTS = {'Мусорное': 20,
+              'Обычное': 40,
+              'Качественное': 110,
+              'Высокотехнологичное': 200,
+              'Шедевральное': 300,
+              'Легендарное': 480}
 
 db_session.global_init('db/game_database.db')
 app = Flask(__name__)
@@ -552,6 +559,7 @@ def get_free():
     player = db_sess.query(Player).filter(Player.id == current_user.id).first()
     player.location = f'{info[0]}/free'
     db_sess.commit()
+    normalize_hp()
     return redirect('/adventure')
 
 
@@ -744,7 +752,14 @@ def adventure_page():
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_fail'])
                 else:  # Если что-то купил
-                    give_reward(answer)
+                    if ITEM_COSTS[answer] <= current_user.money:
+                        give_reward(answer)
+                        player = db_sess.query(Player).filter(Player.id == current_user.id).first()
+                        player.money = int(player.money) - ITEM_COSTS[answer]
+                        db_sess.commit()
+                    else:
+                        return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
+                                               place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_not_enough'])
                     get_free()
                     return render_template('adventure_free_page.html', heading='Приключение', location=loc_text,
                                            place=loc_name, additional_text=ADDITIONAL_TEXTS['buy_success'])
